@@ -14,14 +14,14 @@ WHEELLEG_CFG = ArticulationCfg(
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=True,
-            solver_position_iteration_count=4,
-            solver_velocity_iteration_count=0,
+            solver_position_iteration_count=32,
+            solver_velocity_iteration_count=4,
             sleep_threshold=0.005,
             stabilization_threshold=0.001,
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.3),
+        pos=(0.0, 0.0, 0.5),
         joint_pos={
             "LeftFrontMotor": 0.0,
             "LeftBackMotor": 0.0,
@@ -48,8 +48,8 @@ WHEELLEG_CFG = ArticulationCfg(
             joint_names_expr=["LeftWheelMotor", "RightWheelMotor"],
             effort_limit_sim=2.462823726,
             velocity_limit_sim=545.547,
-            stiffness=60.0,
-            damping=1.0,
+            stiffness=0.0,
+            damping=10.0,
         ),
     },
 )

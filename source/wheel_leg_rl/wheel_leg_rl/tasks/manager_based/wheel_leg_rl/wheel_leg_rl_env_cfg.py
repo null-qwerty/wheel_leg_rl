@@ -59,9 +59,21 @@ class WheelLegRlSceneCfg(InteractiveSceneCfg):
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    # joint_effort = mdp.JointEffortActionCfg(
-    #     asset_name="robot", joint_names=["slider_to_cart"], scale=100.0
-    # )
+    leg_joints_effort = mdp.JointEffortActionCfg(
+        asset_name="robot",
+        joint_names=[
+            "LeftFrontMotor",
+            "LeftBackMotor",
+            "RightFrontMotor",
+            "RightBackMotor",
+        ],
+        scale=18.0,
+    )
+    wheel_velocity = mdp.JointVelocityActionCfg(
+        asset_name="robot",
+        joint_names=["LeftWheelMotor", "RightWheelMotor"],
+        scale=545.547,
+    )
 
 
 @configclass
@@ -72,16 +84,51 @@ class ObservationsCfg:
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
 
-    #     # observation terms (order preserved)
-    #     joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel)
-    #     joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel)
+        # observation terms (order preserved)
+        leg_joints_pos_rel = ObsTerm(
+            func=mdp.joint_pos_rel,
+            params={
+                "asset_cfg": SceneEntityCfg(
+                    "robot",
+                    joint_names=[
+                        "LeftFrontMotor",
+                        "LeftBackMotor",
+                        "RightFrontMotor",
+                        "RightBackMotor",
+                    ],
+                )
+            },
+        )
+        leg_joints_vel_rel = ObsTerm(
+            func=mdp.joint_vel_rel,
+            params={
+                "asset_cfg": SceneEntityCfg(
+                    "robot",
+                    joint_names=[
+                        "LeftFrontMotor",
+                        "LeftBackMotor",
+                        "RightFrontMotor",
+                        "RightBackMotor",
+                    ],
+                )
+            },
+        )
+        wheel_joints_vel_rel = ObsTerm(
+            func=mdp.joint_vel_rel,
+            params={
+                "asset_cfg": SceneEntityCfg(
+                    "robot",
+                    joint_names=["LeftWheelMotor", "RightWheelMotor"],
+                )
+            },
+        )
 
-    #     def __post_init__(self) -> None:
-    #         self.enable_corruption = False
-    #         self.concatenate_terms = True
+        def __post_init__(self) -> None:
+            self.enable_corruption = False
+            self.concatenate_terms = True
 
     # # observation groups
-    # policy: PolicyCfg = PolicyCfg()
+    policy: PolicyCfg = PolicyCfg()
 
 
 @configclass
@@ -89,25 +136,36 @@ class EventCfg:
     """Configuration for events."""
 
     # reset
-    # reset_cart_position = EventTerm(
-    #     func=mdp.reset_joints_by_offset,
-    #     mode="reset",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=["slider_to_cart"]),
-    #         "position_range": (-1.0, 1.0),
-    #         "velocity_range": (-0.5, 0.5),
-    #     },
-    # )
+    reset_leg = EventTerm(
+        func=mdp.reset_joints_by_offset,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                joint_names=[
+                    "LeftFrontMotor",
+                    "LeftBackMotor",
+                    "RightFrontMotor",
+                    "RightBackMotor",
+                ],
+            ),
+            "position_range": (0.0, 0.0),
+            "velocity_range": (-0.1, 0.1),
+        },
+    )
 
-    # reset_pole_position = EventTerm(
-    #     func=mdp.reset_joints_by_offset,
-    #     mode="reset",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=["cart_to_pole"]),
-    #         "position_range": (-0.25 * math.pi, 0.25 * math.pi),
-    #         "velocity_range": (-0.25 * math.pi, 0.25 * math.pi),
-    #     },
-    # )
+    reset_wheel = EventTerm(
+        func=mdp.reset_joints_by_offset,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                joint_names=["LeftWheelMotor", "RightWheelMotor"],
+            ),
+            "position_range": (0.0, 0.0),
+            "velocity_range": (-0.1, 0.1),
+        },
+    )
 
 
 @configclass
@@ -145,16 +203,8 @@ class RewardsCfg:
 class TerminationsCfg:
     """Termination terms for the MDP."""
 
-    # # (1) Time out
-    # time_out = DoneTerm(func=mdp.time_out, time_out=True)
-    # # (2) Cart out of bounds
-    # cart_out_of_bounds = DoneTerm(
-    #     func=mdp.joint_pos_out_of_manual_limit,
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=["slider_to_cart"]),
-    #         "bounds": (-3.0, 3.0),
-    #     },
-    # )
+    # (1) Time out
+    time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
 
 ##
@@ -183,5 +233,5 @@ class WheelLegRlEnvCfg(ManagerBasedRLEnvCfg):
         # viewer settings
         self.viewer.eye = (8.0, 0.0, 5.0)
         # simulation settings
-        self.sim.dt = 1 / 120
+        self.sim.dt = 1 / 360
         self.sim.render_interval = self.decimation
