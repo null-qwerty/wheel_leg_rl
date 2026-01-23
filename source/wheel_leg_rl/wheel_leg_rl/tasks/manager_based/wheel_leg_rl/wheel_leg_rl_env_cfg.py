@@ -59,7 +59,7 @@ class WheelLegRlSceneCfg(InteractiveSceneCfg):
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    leg_joints_effort = mdp.JointEffortActionCfg(
+    leg_joints_position = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[
             "LeftFrontMotor",
@@ -67,7 +67,7 @@ class ActionsCfg:
             "RightFrontMotor",
             "RightBackMotor",
         ],
-        scale=18.0,
+        scale=1.0,
     )
     wheel_velocity = mdp.JointVelocityActionCfg(
         asset_name="robot",
@@ -162,7 +162,7 @@ class EventCfg:
                 "robot",
                 joint_names=["LeftWheelMotor", "RightWheelMotor"],
             ),
-            "position_range": (0.0, 0.0),
+            "position_range": (-3.14, 3.14),
             "velocity_range": (-0.1, 0.1),
         },
     )
@@ -233,5 +233,5 @@ class WheelLegRlEnvCfg(ManagerBasedRLEnvCfg):
         # viewer settings
         self.viewer.eye = (8.0, 0.0, 5.0)
         # simulation settings
-        self.sim.dt = 1 / 360
+        self.sim.dt = 1 / 360.0
         self.sim.render_interval = self.decimation
